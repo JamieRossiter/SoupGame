@@ -25,14 +25,16 @@ Window_Draggable.prototype.initialize = function(x, y, width, height){
     this._originalX = x;
     this._originalY = y;
     this._windowType = "";
-    this._isDraggable = true;
+    this._isDraggable = false;
     this._initTouchPos = {x: 0, y: 0};
     this._initWindowPos = {x: 0, y: 0};
-    this._grabCursor = false;
 }
 
 Window_Draggable.prototype.refresh = function(){
     this.contents.clear();
+
+    // Ensure that if two windows are overlapping, the top window is dragged
+    this.handleOverlappingWindows();
     
     // Determines where in the scene stack the window is
     this._scenePosition = SceneManager._scene.getChildIndex(this)
@@ -50,9 +52,31 @@ Window_Draggable.prototype.refresh = function(){
     }
 }
 
+Window_Draggable.prototype.handleOverlappingWindows = function(){
+    let draggableWindows = SceneManager._scene.children.filter(child => {
+        return "_isDraggable" in child;
+    })
+    const filteredWindows = draggableWindows.filter(win => {
+        let mouseX = TouchInput.x;
+        let mouseY = TouchInput.y;
+        let validX = mouseX >= win.x && mouseX <= win.x + win.width;
+        let validY = mouseY >= win.y && mouseY <= win.y + win.height;
+        return validX && validY;
+    })
+    const topWindow = filteredWindows[filteredWindows.length - 1];
+    if(topWindow){
+        topWindow._isDraggable = true;
+        draggableWindows.forEach(win => {
+            if(win != topWindow){
+                win._isDraggable = false;
+            }
+        })
+    }
+}
+
 Window_Draggable.prototype.handleDrag = function(){
     this.maintainOriginalWindowPositionOnDrag();
-    const lastStackElem = SceneManager._scene.children.length - 1; // We negate by this number to allow for text inputs that must be at the top of the stack.
+    const lastStackElem = SceneManager._scene.children.length - 2; // This allows for the mouse cursor
     
     // Check if windows are being selected and dragged
     if(TouchInput.isPressed() && this.checkMouseClickValid(EXIT_BTN_COORDS) && !$gameTemp._isDragging && this._isDraggable){
@@ -60,9 +84,7 @@ Window_Draggable.prototype.handleDrag = function(){
         SceneManager._scene.setChildIndex(this, lastStackElem);
     }
 
-    if(TouchInput.isLongPressed() && $gameTemp._isDragging){
-        CallPluginCommand("set_default_cursor grab");
-        this._grabCursor = true;
+    if(TouchInput.isPressed() && $gameTemp._isDragging){
         if(this._scenePosition === lastStackElem){
             if(this._initTouchPos.x && this._initTouchPos.y){
                 var deltaX = TouchInput.x - this._initTouchPos.x;
@@ -75,10 +97,6 @@ Window_Draggable.prototype.handleDrag = function(){
         }
     } else {
         $gameTemp._isDragging = false;
-        if(this._grabCursor){
-            CallPluginCommand("set_default_cursor default");
-            this._grabCursor = false;
-        }
     }
 }
 
@@ -89,19 +107,6 @@ Window_Draggable.prototype.maintainOriginalWindowPositionOnDrag = function(){
         this._initWindowPos = { x: this.x, y: this.y };
     }
 }
-
-// Window_Draggable.prototype.isOverlapping = function(){
-//     let overlap = SceneManager._scene.children.filter(win => {
-//         if(win._windowType && !(win._windowType === this._windowType)){
-//             // console.log(win) // TODO: The Win coordinates do not update when the window is moved. They need to change.
-//             let validX = (this.x < win.width - (win.width / 4) && this.width > (win.x / 4));
-//             let validY = (this.y < win.height && this.height > win.y);
-//             return (validX);
-//         }
-//     })
-//     return overlap.length > 0;
-// }
-
 
 Window_Draggable.prototype.checkMouseClickValid = function(exitBtn){
     let mouseX = TouchInput.x;

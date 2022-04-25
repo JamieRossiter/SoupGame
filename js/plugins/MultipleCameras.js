@@ -153,8 +153,8 @@
 		var sprite = new PIXI.Sprite(texture);
 		// sprite.x = camera.x * tw; // Edited by Jamie Rossiter - remove mapping to tile sizes
 		// sprite.y = camera.y * th; // Edited by Jamie Rossiter - remove mapping to tile sizes
-		sprite.x = camera.x + 15; // edited by Jamie Rossiter - add an offset to the camera x coord
-		sprite.y = camera.y + 15; // edited by Jamie Rossiter - add an offset to the camera y coord
+		sprite.x = camera.x + 10; // edited by Jamie Rossiter - add an offset to the camera x coord
+		sprite.y = camera.y + 10; // edited by Jamie Rossiter - add an offset to the camera y coord
 		if (camera.lineWidth > 0) {
 			var lineWidth = camera.lineWidth;
 			var lineColor = camera.lineColor;

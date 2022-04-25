@@ -174,11 +174,9 @@ TTK.DraggableCamera = {};
 		_Scene_Map_update.call(this);
 
 		// Added by Jamie Rossiter - change cursor if the right click button is being held down
-		if($.rightClick){
-			CallPluginCommand("set_default_cursor grab");
-		} else {
-			CallPluginCommand("set_default_cursor default");
-		}
+		// if($.rightClick){
+		// 	$gameTemp.changeCursor("cursor_grab");
+		// }
 
 		if (TouchInput.isMoved() && $.enabled && $.rightClick) { // Edited by Jamie Rossiter - check to see if the right click button is pressed to move the camera
 			var newX = ((TouchInput._lastCameraX - TouchInput.x) / 48) * $.speed;

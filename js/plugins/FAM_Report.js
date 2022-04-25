@@ -43,6 +43,7 @@ Window_Report.prototype.refresh = function(){
     })
     // Draw report Title
     this.drawReportTitle();
+    
 }
 
 Window_Report.prototype.drawReportImage = function(){
@@ -111,20 +112,20 @@ Window_Report.prototype.detectKeyStroke = function(textInput){
 
 /* TESTING */
 /* Override map scene */
-// const report_scene_map_start_override = Scene_Map.prototype.start;
-// const report_scene_map_update_override = Scene_Map.prototype.update;
+const report_scene_map_start_override = Scene_Map.prototype.start;
+const report_scene_map_update_override = Scene_Map.prototype.update;
 
-// Scene_Map.prototype.start = function(){
-//     report_scene_map_start_override.call(this);
-//     this._reportWindow = new Window_Report(300, 50, 310, 450);
-//     this.addChild(this._reportWindow);
-// }
+Scene_Map.prototype.start = function(){
+    report_scene_map_start_override.call(this);
+    this._reportWindow = new Window_Report(300, 50, 310, 450);
+    this.addChild(this._reportWindow);
+}
 
-// Scene_Map.prototype.update = function(){
-//     report_scene_map_update_override.call(this);
-//     // if($gameTemp._visibleDocuments.report){
-//     // } else {
-//     //     this.removeChild(this._passportWindow);
-//     // }
-//     this._reportWindow.refresh();
-// }
+Scene_Map.prototype.update = function(){
+    report_scene_map_update_override.call(this);
+    // if($gameTemp._visibleDocuments.report){
+    // } else {
+    //     this.removeChild(this._passportWindow);
+    // }
+    this._reportWindow.refresh();
+}

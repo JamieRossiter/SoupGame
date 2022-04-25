@@ -73,7 +73,7 @@ Window_Snapback.prototype = Object.create(Window_Base.prototype);
 Window_Snapback.prototype.constructor = Window_Snapback;
 
 Window_Snapback.prototype.initialize = function(){
-    this.windowSize = { width: 125, height: 125 };
+    this.windowSize = { width: 115, height: 115 };
     Window_Base.prototype.initialize.call(this, 0, 0, this.windowSize.width, this.windowSize.height);
 }
 
