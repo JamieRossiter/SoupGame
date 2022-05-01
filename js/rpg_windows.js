@@ -4453,7 +4453,7 @@ Window_Message.prototype.startInput = function() {
 
 Window_Message.prototype.isTriggered = function() {
     return (Input.isRepeated('ok') || Input.isRepeated('cancel') ||
-            TouchInput.isRepeated());
+            TouchInput.isRepeated() && !TouchInput.isLongPressed()); // Added by Jamie Rossiter (holding TouchInput does not skip text)
 };
 
 Window_Message.prototype.doesContinue = function() {
@@ -4467,13 +4467,16 @@ Window_Message.prototype.areSettingsChanged = function() {
 };
 
 Window_Message.prototype.updateShowFast = function() {
-    if (this.isTriggered()) {
+    if (TouchInput.isLongPressed()) { // Added by Jamie Rossiter (holding TouchInput fast forwards text)
         this._showFast = true;
+    } else {
+        this._showFast = false;
     }
 };
 
 Window_Message.prototype.newPage = function(textState) {
     this.contents.clear();
+    this._showFast = false;
     this.resetFontSettings();
     this.clearFlags();
     this.loadMessageFace();
