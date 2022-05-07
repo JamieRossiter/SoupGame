@@ -56,12 +56,12 @@ Window_Notebook.prototype.drawVillagerImage = function(){
 }
 
 Window_Notebook.prototype.drawVillagerName = function(){
-    this.drawText("SIMON MORSZO", 50, 130, 200, "center");
+    this.drawTextExAlign("\\c[1]SIMON MORSZO\\c[0]", 50, 130, 100, "center");
 }
 
 Window_Notebook.prototype.drawVillagerPersonality = function(){
-    this.drawTextEx("\\}P O L I T I C A L  A L I G N M E N T\\{", 50, 160);
-    this.drawText("Oppositional Left", 55, 180, 200, "center");
+    this.drawTextEx("\\c[1]Alignment\\c[0]", 50, 160);
+    this.drawTextExAlign("\\c[1]Left\\c[0]", -50, 185, 200, "center");
     this.drawPicture("example_text", 278, 65);
 }
 
@@ -78,16 +78,16 @@ Window_Notebook.prototype.checkForNavButtonPress = function(arrow){
 /* TESTING */
 
 /* Override map scene */
-// const Notebook_scene_map_start_override = Scene_Map.prototype.start;
-// const Notebook_scene_map_update_override = Scene_Map.prototype.update;
+const Notebook_scene_map_start_override = Scene_Map.prototype.start;
+const Notebook_scene_map_update_override = Scene_Map.prototype.update;
 
-// Scene_Map.prototype.start = function(){
-//     Notebook_scene_map_start_override.call(this);
-//     this._notebookWindow = new Window_Notebook(500, 50, 580, 450);
-//     this.addChild(this._notebookWindow);
-// }
+Scene_Map.prototype.start = function(){
+    Notebook_scene_map_start_override.call(this);
+    this._notebookWindow = new Window_Notebook(500, 50, 580, 450);
+    this.addChild(this._notebookWindow);
+}
 
-// Scene_Map.prototype.update = function(){
-//     Notebook_scene_map_update_override.call(this);
-//     this._notebookWindow.refresh();
-// }
+Scene_Map.prototype.update = function(){
+    Notebook_scene_map_update_override.call(this);
+    this._notebookWindow.refresh();
+}

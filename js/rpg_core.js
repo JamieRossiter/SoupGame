@@ -3467,7 +3467,7 @@ TouchInput.initialize = function() {
  * @property keyRepeatWait
  * @type Number
  */
-TouchInput.keyRepeatWait = 10;
+TouchInput.keyRepeatWait = 5;
 
 /**
  * The interval of the pseudo key repeat in frames.

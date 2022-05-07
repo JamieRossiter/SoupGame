@@ -34,27 +34,28 @@ Window_Passport.prototype.refresh = function(){
 }
 
 Window_Passport.prototype.drawIdTitle = function(){
-    this.drawTextEx("\\} M I N I S T R Y  O F", 80, 15);
-    this.drawTextEx("\\}  A G R I C U L T U R E \\{", 69, 30);
-    this.drawTextEx("LABOR CERTIFICATE", 60, 100);
+    this.drawTextEx("\\c[1]MINISTRY OF\\c[0]", 55, 15);
+    this.drawTextEx("\\c[1]AGRICULTURE\\c[0]", 55, 35);
+    this.drawTextEx("\\c[1]LABOR\\c[0]", 99, 83);
+    this.drawTextEx("\\c[1]CERTIFICATE\\c[0]", 55, 103);
 }
 
 Window_Passport.prototype.drawIdImage = function(){
-    this.drawCharacter("npc1", 0, 70, 275);
+    this.drawCharacter("npc1", 0, 70, 290);
 }
 
 Window_Passport.prototype.drawIdName = function(){
-    this.drawText("Morszo, Simon", 90, 175, 150, "right");
+    this.drawTextExAlign("\\c[1]Morszo, Simon\\c[0]", 0, 165, 100, "right");
 }
 
 Window_Passport.prototype.drawIdExpiry = function(){
-    this.drawTextEx("\\} E X P I R E S \\{", 160, 200);
-    this.drawText("02-08-1928", 90, 215, 150, "right");
+    this.drawTextExAlign("\\c[1]EXPIRES\\c[0]", 35, 190, 100, "right");
+    this.drawTextExAlign("\\c[1]02-08-1928\\c[0]", 30, 215, 100, "right");
 }
 
 Window_Passport.prototype.drawIdRegion = function(){
-    this.drawTextEx("\\} P R O V I N C E \\{", 148, 240);
-    this.drawText("Ormasz", 80, 255, 160, "right");
+    this.drawTextEx("\\c[1]PROVINCE\\c[0]", 105, 245);
+    this.drawTextExAlign("\\c[1]Ormasz\\c[0]", 50, 265, 100, "right");
 }
 
 /* TESTING */

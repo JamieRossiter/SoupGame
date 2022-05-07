@@ -23,9 +23,9 @@ Window_Report.prototype.initialize = function(x, y, width, height){
     Window_Draggable.prototype.initialize.call(this, x, y, width, height);
     this._windowType = "report";
     this._textInputs = {
-        name: {header: "N A M E", x: 35, y: 200, bitmap: null, buffer: "", focus: false},
-        province: {header: "P R O V I N C E", x: 35, y: 270, bitmap: null, buffer: "", focus: false},
-        yield_collected: {header: "Y I E L D  C O L L E C T E D", x: 35, y: 340, bitmap: null, buffer: "", focus: false}
+        name: {header: "\\c[1]Name\\c[0]", x: 35, y: 200, bitmap: null, buffer: "", focus: false},
+        province: {header: "\\c[1]Province\\c[0]", x: 35, y: 270, bitmap: null, buffer: "", focus: false},
+        yield_collected: {header: "\\c[1]Yield\\c[0]", x: 35, y: 340, bitmap: null, buffer: "", focus: false}
     }
     // Create listeners that listen to the player's key strokes depending on the text input
     this.createKeyStrokeListeners();
@@ -51,11 +51,10 @@ Window_Report.prototype.drawReportImage = function(){
 }
 
 Window_Report.prototype.drawReportTitle = function(){
-    let xOffset = 15;
-    let yOffset = 80;
-    this.drawTextEx("\\} M I N I S T R Y  O F", 80 - xOffset, 15 + yOffset);
-    this.drawTextEx("\\}  A G R I C U L T U R E \\{", 69 - xOffset, 30 + yOffset);
-    this.drawTextEx("COLLECTION REPORT", 40, 130);
+    this.drawTextExAlign("\\c[1]MINISTRY OF\\c[0]", 25, 90, 100, "center");
+    this.drawTextExAlign("\\c[1]AGRICULTURE\\c[0]", 25, 110, 100, "center");
+    this.drawTextExAlign("\\c[1]COLLECTION\\c[0]", 25, 140, 100, "center");
+    this.drawTextExAlign("\\c[1]REPORT\\c[0]", 25, 160, 100, "center");
 }
 
 Window_Report.prototype.drawTextInputs = function(textInput){
@@ -65,14 +64,14 @@ Window_Report.prototype.drawTextInputs = function(textInput){
     } else {
         input.bitmap = this.drawPicture("text_input", input.x, input.y);   
     }
-    this.drawTextEx(input.buffer, input.x + 10, input.y);
+    this.drawTextEx(`\\c[1]${input.buffer}\\c[0]`, input.x, input.y);
     this.detectFocus(textInput);
     this.drawTextInputHeaders(textInput);
 }
 
 Window_Report.prototype.drawTextInputHeaders = function(textInput){
     let input = this._textInputs[textInput];
-    this.drawTextEx(`\\} ${input.header} \\{`, input.x, input.y - 30);
+    this.drawTextEx(`\\c[1] ${input.header} \\c[0]`, input.x - 10, input.y - 30);
 }
 
 Window_Report.prototype.createKeyStrokeListeners = function(){

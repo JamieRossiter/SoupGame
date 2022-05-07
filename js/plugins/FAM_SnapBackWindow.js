@@ -53,8 +53,8 @@ Scene_Map.prototype.update = function(){
             this._cameraWindow.x = windowEdgeX - this._cameraWindow.width;
         }
         if(!this._cameraWindow.isPlayerOnScreen().validSW){
-            this._cameraWindow.y = 0;
-            this._cameraWindow.x = windowEdgeX - this._cameraWindow.width;
+            this._cameraWindow.y = windowEdgeY - this._cameraWindow.height;
+            this._cameraWindow.x = 0;
         }
         this._cameraWindow.drawCameraWindow(this._cameraWindow.x, this._cameraWindow.y);
     } else {

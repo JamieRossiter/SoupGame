@@ -37,5 +37,5 @@ Window_Potato.prototype.refresh = function(){
     this.contents.clear();
     this.drawIcon(327, -3, -5);
     // $gameTemp._potatoCount++;
-    this.drawText($gameTemp._potatoCount.toString(), 40, -10, 50, "left");
+    this.drawTextEx(`\\c[1]${$gameTemp._potatoCount.toString()}\\c[0]`, 40, -8, 50, "left");
 }
