@@ -61,16 +61,16 @@ Window_Passport.prototype.drawIdRegion = function(){
 /* TESTING */
 
 /* Override map scene */
-const passport_scene_map_start_override = Scene_Map.prototype.start;
-const passport_scene_map_update_override = Scene_Map.prototype.update;
+// const passport_scene_map_start_override = Scene_Map.prototype.start;
+// const passport_scene_map_update_override = Scene_Map.prototype.update;
 
-Scene_Map.prototype.start = function(){
-    passport_scene_map_start_override.call(this);
-    this._passportWindow = new Window_Passport(50, 50, 300, 350);
-    this.addChild(this._passportWindow);
-}
+// Scene_Map.prototype.start = function(){
+//     passport_scene_map_start_override.call(this);
+//     this._passportWindow = new Window_Passport(50, 50, 300, 350);
+//     this.addChild(this._passportWindow);
+// }
 
-Scene_Map.prototype.update = function(){
-    passport_scene_map_update_override.call(this);
-    this._passportWindow.refresh();
-}
+// Scene_Map.prototype.update = function(){
+//     passport_scene_map_update_override.call(this);
+//     this._passportWindow.refresh();
+// }

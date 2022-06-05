@@ -78,16 +78,16 @@ Window_Notebook.prototype.checkForNavButtonPress = function(arrow){
 /* TESTING */
 
 /* Override map scene */
-const Notebook_scene_map_start_override = Scene_Map.prototype.start;
-const Notebook_scene_map_update_override = Scene_Map.prototype.update;
+// const Notebook_scene_map_start_override = Scene_Map.prototype.start;
+// const Notebook_scene_map_update_override = Scene_Map.prototype.update;
 
-Scene_Map.prototype.start = function(){
-    Notebook_scene_map_start_override.call(this);
-    this._notebookWindow = new Window_Notebook(500, 50, 580, 450);
-    this.addChild(this._notebookWindow);
-}
+// Scene_Map.prototype.start = function(){
+//     Notebook_scene_map_start_override.call(this);
+//     this._notebookWindow = new Window_Notebook(500, 50, 580, 450);
+//     this.addChild(this._notebookWindow);
+// }
 
-Scene_Map.prototype.update = function(){
-    Notebook_scene_map_update_override.call(this);
-    this._notebookWindow.refresh();
-}
+// Scene_Map.prototype.update = function(){
+//     Notebook_scene_map_update_override.call(this);
+//     this._notebookWindow.refresh();
+// }
