@@ -12,21 +12,26 @@ Scene_Boot.prototype.create = function(){
     ImageManager.loadSystem("cursor_grab");
 }
 
-const cursor_game_temp_initialize_override = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    cursor_game_temp_initialize_override(this);
-    this._cursor = new Sprite(ImageManager.loadSystem("cursor_normal"));
-};
+// Jamie: For some reason this method causes the character to autowalk downwards. Weird.
+// const cursor_game_temp_initialize_override = Game_Temp.prototype.initialize;
+// Game_Temp.prototype.initialize = function() {
+//     cursor_game_temp_initialize_override(this);
+// };
 
 // /* Override map scene */
 const cursor_scene_base_start_override = Scene_Base.prototype.start;
 Scene_Base.prototype.start = function(){
     cursor_scene_base_start_override.call(this);
+    this._cursorCreated = false;
 }
 
 const cursor_scene_base_update_override = Scene_Base.prototype.update;
 Scene_Base.prototype.update = function(){
     cursor_scene_base_update_override.call(this);
+    if(!this._cursorCreated){
+        $gameTemp._cursor = new Sprite(ImageManager.loadSystem("cursor_normal"));
+        this._cursorCreated = true;
+    }
     $gameTemp._cursor.x = TouchInput.x;
     $gameTemp._cursor.y = TouchInput.y;
     this.addChild($gameTemp._cursor);
