@@ -100,18 +100,18 @@ Window_IngredientCardStats.prototype.refresh = function(stats){
 
 Window_IngredientCardStats.prototype.drawTaste = function(taste){
     this.drawIcon(110, 0, 0);
-    this.drawTextExAlign(`\\c[1]Taste\\c[0]`, 25, -2, 50, "center");
-    this.drawTextExAlign(`\\c[1]${taste.toString()}\\c[0]`, 150, -3, 20, "right");
+    this.drawTextExAlign(`\\c[1]Taste\\c[0]`, 40, -2, 50, "left");
+    this.drawText(`${taste.toString()}`, 150, -3, 20, "right");
 }
 
 Window_IngredientCardStats.prototype.drawHeartiness = function(heartiness){
     this.drawIcon(1, 0, 28);
-    this.drawTextExAlign(`\\c[1]Hearty\\c[0]`, 35, 25, 50, "center");
-    this.drawTextExAlign(`\\c[1]${heartiness.toString()}\\c[0]`, 150, 25, 20, "right");
+    this.drawTextExAlign(`\\c[1]Hearty\\c[0]`, 50, 25, 50, "left");
+    this.drawText(`${heartiness.toString()}`, 150, 25, 20, "right");
 }
 
 Window_IngredientCardStats.prototype.drawCalories = function(calories){
     this.drawIcon(338, -2, 60);
-    this.drawTextExAlign(`\\c[1]Calories\\c[0]`, 45, 53, 50, "center");
-    this.drawTextExAlign(`\\c[1]${calories.toString()}\\c[0]`, 150, 53, 20, "right");
+    this.drawTextExAlign(`\\c[1]Calor.\\c[0]`, 45, 53, 50, "left");
+    this.drawText(`${calories.toString()}`, 150, 53, 20, "right");
 }

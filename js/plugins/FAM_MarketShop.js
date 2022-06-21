@@ -7,7 +7,7 @@ Game_Temp.prototype.initialize = function() {
     this._marketShop = {
         name: "Shop Name",
         type: "Shop Type",
-        goods: [[0, 9, 1], [0, 10, 1]],
+        goods: [[]],
         ingredientCard: {
             name: "Ingredient Name",
             quality: 0,
@@ -73,35 +73,48 @@ Scene_MarketShop.prototype.update = function(){
 
 Scene_MarketShop.prototype.createMainWindow = function(){
     this._shopWindow = new Window_MarketShop(this.collectiveX, this.collectiveY + 70, 195, this._goods);
-    this.addWindow(this._shopWindow);
+    this.addChild(this._shopWindow);
 }
 
 Scene_MarketShop.prototype.createShopkeeperWindow = function(shopType){
     this._shopkeeperWindow = new Window_Shopkeeper(this.collectiveX, this.collectiveY + (this._itemCardWindow.height - 80), 456, 80, shopType);
-    this.addWindow(this._shopkeeperWindow);
+    this.addChild(this._shopkeeperWindow);
 }
 
 Scene_MarketShop.prototype.createKuponWindow = function(){
     this._kuponWindow = new Window_Kupon(this.collectiveX + 291, this.collectiveY);
-    this.addWindow(this._kuponWindow);
+    this.addChild(this._kuponWindow);
 }
 
 Scene_MarketShop.prototype.createShopNameWindow = function(shopName){
     this._shopNameWindow = new Window_MarketShopName(this.collectiveX, this.collectiveY, 285, 65, shopName);
-    this.addWindow(this._shopNameWindow);
+    this.addChild(this._shopNameWindow);
 }
 
 Scene_MarketShop.prototype.createItemCardWindow = function(ingredientData){
     this._itemCardWindow = new Window_IngredientCard(603, 160, ingredientData);
-    this.addWindow(this._itemCardWindow);
+    this.addChild(this._itemCardWindow);
+}
+
+Scene_MarketShop.prototype.createBuyConfirmWindow = function(){
+    let itemY = this._shopWindow.itemHeight() * this._shopWindow.index();
+    this._buyConfirmWindow = new Window_MarketShopConfirm(this._shopWindow.x + 120, this._shopWindow.y + itemY);
 }
 
 Scene_MarketShop.prototype.onBuy = function () {
-    this._item = this._shopWindow.item();
-    $gameParty.loseGold(this._shopWindow.price(this._item));
-    $gameParty.gainItem(this._item, 1);
-    this.activateShopWindow();
-    this.create();
+    this._shopWindow.deactivate();
+    this.createBuyConfirmWindow();
+    this.addChild(this._buyConfirmWindow);
+    this._buyConfirmWindow.setHandler('confirm', () => {
+        this._item = this._shopWindow.item();
+        $gameParty.loseGold(this._shopWindow.price(this._item));
+        $gameParty.gainItem(this._item, 1);
+        this.activateShopWindow();
+    });
+    this._buyConfirmWindow.setHandler('cancel', () => { 
+        this.removeChild(this._buyConfirmWindow);
+        this.activateShopWindow();
+    });
 };
 
 Scene_MarketShop.prototype.activateShopWindow = function () {
@@ -126,7 +139,6 @@ Window_MarketShop.prototype.initialize = function (x, y, height, goods) {
 Window_MarketShop.prototype.refresh = function(){
     Window_ShopBuy.prototype.refresh.call(this);
     $gameTemp._marketShop.ingredientCard = this.getIngredientCardDataFromItem(this.item());
-    console.log($gameTemp._marketShop);
     
 }
 
@@ -229,5 +241,27 @@ Window_Kupon.prototype.windowHeight = function () {
 Window_Kupon.prototype.refresh = function () {
     this.contents.clear();
     this.drawText(this.value().toString(), 70, -1, 50, "right");
-    this.drawIcon(382, -2, 0);
+    this.drawIcon(382, -2, 5);
 };
+
+/* Window Marketshop - Confirm Window */
+
+function Window_MarketShopConfirm(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_MarketShopConfirm.prototype = Object.create(Window_HorzCommand.prototype);
+Window_MarketShopConfirm.prototype.constructor = Window_MarketShopConfirm;
+
+Window_MarketShopConfirm.prototype.initialize = function(x, y){
+    Window_HorzCommand.prototype.initialize.call(this, x, y);
+}
+
+Window_MarketShopConfirm.prototype.makeCommandList = function(){
+    this.addCommand("Buy", "confirm", true);
+    this.addCommand("Cancel", "cancel", true);
+}
+
+Window_MarketShopConfirm.prototype.itemWidth = function(){
+    return 90;
+}
