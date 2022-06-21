@@ -46,6 +46,36 @@ Window_IngredientCard.prototype.drawPrice = function(price){
     this.drawIcon(382, 105, 0);
 }
 
+/* Get Ingredient Card Data from Item in Window_Base */
+Window_IngredientCard.prototype.getIngredientCardDataFromItem = function(item){
+    const data = {stats: {}};
+    if(item){
+        // Get obvious data
+        data["name"] = item.name;
+        data["price"] = item.price;
+        if(item.note){
+            // Get data from item note tag
+            let split = item.note.split("\n");
+            let keys = split.map(datum => {
+                let key = datum.split(":")[0];
+                return key.trim();
+            })
+            let values = split.map(datum => {
+                let value = datum.split(":")[1];
+                return value.trim();
+            })
+            keys.forEach((key, index) => {
+                if(["taste", "heartiness", "calories"].includes(key)){
+                    data["stats"][key] = values[index];
+                } else {
+                    data[key] = values[index]; 
+                }
+            })
+        }
+    }
+    return data;
+}
+
 /* SUB WINDOWS */
 
 /* Window ItemCardQuality */
@@ -85,7 +115,7 @@ function Window_IngredientCardStats(){
 Window_IngredientCardStats.prototype = Object.create(Window_Base.prototype);
 Window_IngredientCardStats.prototype.constructor = Window_IngredientCardStats;
 
-Window_IngredientCardStats.prototype.initialize = function(parentSize, stats){
+Window_IngredientCardStats.prototype.initialize = function(parentSize){
     this.windowSize = { width: parentSize.width, height: 125 };
     this.windowPos = { x: 0, y: parentSize.height - this.windowSize.height };
     Window_Base.prototype.initialize.call(this, this.windowPos.x, this.windowPos.y, this.windowSize.width, this.windowSize.height);
@@ -114,4 +144,17 @@ Window_IngredientCardStats.prototype.drawCalories = function(calories){
     this.drawIcon(338, -2, 60);
     this.drawTextExAlign(`\\c[1]Calor.\\c[0]`, 45, 53, 50, "left");
     this.drawText(`${calories.toString()}`, 150, 53, 20, "right");
+}
+
+/* TESTING */
+const ing_scene_start_override = Scene_Map.prototype.start;
+const ing_scene_update_override = Scene_Map.prototype.update;
+
+Scene_Map.prototype.start = function(){
+    ing_scene_start_override.call(this);
+    // SceneManager.push(Scene_SoupCooking);
+}
+
+Scene_Map.prototype.update = function(){
+    ing_scene_update_override.call(this);
 }

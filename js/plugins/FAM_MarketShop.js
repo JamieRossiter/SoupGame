@@ -1,7 +1,7 @@
 /* Create Game_Temp variables at boot */
 const marketshop_game_temp_initialize_override = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-    marketshop_game_temp_initialize_override(this);
+    marketshop_game_temp_initialize_override.call(this);
     this.clearDestination(); // Prevents automatic movement at boot
     // MarketShop object
     this._marketShop = {
@@ -67,7 +67,7 @@ Scene_MarketShop.prototype.create = function () {
 
 Scene_MarketShop.prototype.update = function(){
     Scene_MenuBase.prototype.update.call(this);
-    this._shopWindow.refresh();
+    this._shopWindow.refresh(this._itemCardWindow.getIngredientCardDataFromItem(this.item()));
     this._itemCardWindow.refresh($gameTemp._marketShop.ingredientCard);
 }
 
@@ -136,39 +136,9 @@ Window_MarketShop.prototype.initialize = function (x, y, height, goods) {
     Window_ShopBuy.prototype.initialize.call(this, x, y, height, goods);
 }
 
-Window_MarketShop.prototype.refresh = function(){
+Window_MarketShop.prototype.refresh = function(data){
     Window_ShopBuy.prototype.refresh.call(this);
-    $gameTemp._marketShop.ingredientCard = this.getIngredientCardDataFromItem(this.item());
-    
-}
-
-Window_MarketShop.prototype.getIngredientCardDataFromItem = function(item){
-    const data = {stats: {}};
-    if(item){
-        // Get obvious data
-        data["name"] = item.name;
-        data["price"] = item.price;
-        if(item.note){
-            // Get data from item note tag
-            let split = item.note.split("\n");
-            let keys = split.map(datum => {
-                let key = datum.split(":")[0];
-                return key.trim();
-            })
-            let values = split.map(datum => {
-                let value = datum.split(":")[1];
-                return value.trim();
-            })
-            keys.forEach((key, index) => {
-                if(["taste", "heartiness", "calories"].includes(key)){
-                    data["stats"][key] = values[index];
-                } else {
-                    data[key] = values[index]; 
-                }
-            })
-        }
-    }
-    return data;
+    $gameTemp._marketShop.ingredientCard = data;
 }
 
 /* Window MarketShop - Shopkeeper Window */

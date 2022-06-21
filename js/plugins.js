@@ -19,5 +19,6 @@ var $plugins =
 {"name":"MultipleCameras","status":true,"description":"Place multiple cameras (viewpoints) on the screen.","parameters":{}},
 {"name":"DrawTextExAlign","status":true,"description":"","parameters":{}},
 {"name":"FAM_IngredientCardWindow","status":true,"description":"","parameters":{}},
-{"name":"FAM_MarketShop","status":true,"description":"","parameters":{}}
+{"name":"FAM_MarketShop","status":true,"description":"","parameters":{}},
+{"name":"FAM_SoupCooking","status":true,"description":"","parameters":{}}
 ];
