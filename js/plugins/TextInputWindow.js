@@ -10,11 +10,12 @@ function Window_TextInput(){
 Window_TextInput.prototype = Object.create(Window_Base.prototype);
 Window_TextInput.prototype.constructor = Window_TextInput;
 
-Window_TextInput.prototype.initialize = function(parentWindow, offsetX, offsetY, width, height){
-    Window_Base.prototype.initialize.call(this, 0, 0, width, height);
+Window_TextInput.prototype.initialize = function(parentWindow, x, y, width, height, defaultText, charLimit){
+    Window_Base.prototype.initialize.call(this, x, y, width, height);
+    this._charLimit = charLimit;
+    this._defaultText = defaultText;
+    this._textBuffer = this._defaultText.length > 0 ? this._defaultText : "";
     this._parentWindow = parentWindow;
-    this._offset = { x: offsetX, y: offsetY };
-    this._textBuffer = "";
     this.detectKeyStroke();
     this.detectFocus();
     this.setBackgroundType(2);
@@ -22,16 +23,9 @@ Window_TextInput.prototype.initialize = function(parentWindow, offsetX, offsetY,
 
 Window_TextInput.prototype.refresh = function(){
     this.contents.clear();
-    if(this._focus){
-        this.drawPicture("text_input_focus", 0, 0);
-    } else {
-        this.drawPicture("text_input", 0, 0);
-    }
-    this.drawTextEx(this._textBuffer, 10, 0);
-    this.x = this._parentWindow.x + this._offset.x;
-    this.y = this._parentWindow.y + this._offset.y;
-    // let stackElemAboveNotebook = SceneManager._scene.getChildIndex(SceneManager._scene.children.find(nbWin => nbWin._windowType === "notebook"));
-    // SceneManager._scene.setChildIndex(this, stackElemAboveNotebook);
+    if(this._textBuffer === this._defaultText) this.changePaintOpacity(false);
+    else this.changePaintOpacity(true);
+    this.drawText(this._textBuffer.toUpperCase(), 70, 0, 50, "center");
 }
 
 Window_TextInput.prototype.detectKeyStroke = function(){
@@ -42,6 +36,9 @@ Window_TextInput.prototype.detectKeyStroke = function(){
         if (!(alphabetUpper.contains(e.key) || alphabetLower.contains(e.key))) { print = false; }
         if(e.key === "Backspace"){
             if(this._focus) this._textBuffer = this._textBuffer.slice(0, -1);
+            print = false;
+        }
+        if(this._textBuffer.length >= this._charLimit){
             print = false;
         }
         if(e.code === "Space"){
@@ -55,28 +52,27 @@ Window_TextInput.prototype.detectFocus = function(){
     return document.addEventListener("mousedown", e => {
         let mouseX = TouchInput.x;
         let mouseY = TouchInput.y;
-        let validX = mouseX >= this.x && mouseX <= this.x + this.width;
-        let validY = mouseY >= this.y && mouseY <= this.y + this.height;
-        this._focus = TouchInput.isPressed() && (validX && validY);
+        let actualX = (this._parentWindow.x + this.x);
+        let actualY = (this._parentWindow.y + this.y);
+        let validX = mouseX >= actualX && mouseX <= actualX + this.width;
+        let validY = mouseY >= actualY && mouseY <= actualY + this.height;
+        this._focus = (validX && validY);
+        console.log(this.width);
     })
 }
 
 /* TESTING */
 /* Override map scene */
-const textinput_scene_map_start_override = Scene_Map.prototype.start;
-const textinput_scene_map_update_override = Scene_Map.prototype.update;
+// const textinput_scene_map_start_override = Scene_Map.prototype.start;
+// const textinput_scene_map_update_override = Scene_Map.prototype.update;
 
-Scene_Map.prototype.start = function(){
-    textinput_scene_map_start_override.call(this);
-    // this._textinputWindow = new Window_TextInput(300, 300, 300, 75);
-}
+// Scene_Map.prototype.start = function(){
+//     textinput_scene_map_start_override.call(this);
+//     this._textinputWindow = new Window_TextInput();
+//     this.addChild(this._textinputWindow);
+// }
 
-Scene_Map.prototype.update = function(){
-    textinput_scene_map_update_override.call(this);
-    // this.addChild(this._textinputWindow);
-    // if($gameTemp._isPassportVisible){
-    // } else {
-    //     this.removeChild(this._passportWindow);
-    // }
-    // this._textinputWindow.refresh();
-}
+// Scene_Map.prototype.update = function(){
+//     textinput_scene_map_update_override.call(this);
+//     this._textinputWindow.refresh();
+// }

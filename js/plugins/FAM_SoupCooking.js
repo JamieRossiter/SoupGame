@@ -4,7 +4,19 @@ Game_Temp.prototype.initialize = function() {
     soupcooking_game_temp_initialize_override.call(this);
     this.clearDestination(); // Prevents automatic movement at boot
     this._soupCooking = {
-        ingredients: []
+        ingredients: [],
+        currentRecipe: {
+            name: "Edit Name",
+            quality: 3,
+            price: 250,
+            type: "soup",
+            imgIndex: 0,
+            stats: {
+                taste: 6,
+                heartiness: 3,
+                calories: 980
+            }
+        },
     }
 };
 
@@ -20,8 +32,8 @@ Scene_SoupCooking.prototype.create = function(){
     Scene_MenuBase.prototype.create.call(this);
     this.createIngredientCardWindows();
     this.createIngredientSelectionWindow();
-    this._ingredientSelectionWindow.setHandler('ok',     this.onItemOk.bind(this));
-    this._ingredientSelectionWindow.setHandler('cancel', this.onItemCancel.bind(this));
+    this._ingredientSelectionWindow.setHandler('ok',     this.onIngredientSelect.bind(this));
+    this._ingredientSelectionWindow.setHandler('cancel', () => { SceneManager.pop() });
     this._defaultIngredientData = { 
         name: "New Ingredient",
         quality: 0,
@@ -45,11 +57,7 @@ Scene_SoupCooking.prototype.update = function(){
 Scene_SoupCooking.prototype.handleIngredientDelete = function(){
     this._ingredientCardWMeasurementWindows.forEach((win, index) => {
         if(win.isClicked()){
-            if($gameTemp._soupCooking.ingredients.length == 1){
-                $gameTemp._soupCooking.ingredients = [];
-            } else {
-                $gameTemp._soupCooking.ingredients.splice(index, 1);
-            }
+            $gameTemp._soupCooking.ingredients.splice(index, 1);
             // Reset all windows when clicked
             this._ingredientCardWMeasurementWindows.forEach(win => {
                 win.reset();
@@ -76,7 +84,7 @@ Scene_SoupCooking.prototype.createIngredientSelectionWindow = function(){
 }
 
 Scene_SoupCooking.prototype.populateIngredientCardWindows = function(){
-    let ingredientsData = $gameTemp._soupCooking.ingredients;
+    const ingredientsData = $gameTemp._soupCooking.ingredients;
     if(ingredientsData.length > 0){
         for(let i = 0; i < ingredientsData.length; i++){
             if(ingredientsData[i]){
@@ -87,25 +95,102 @@ Scene_SoupCooking.prototype.populateIngredientCardWindows = function(){
     } 
 }
 
-Scene_SoupCooking.prototype.onItemOk = function() {
+Scene_SoupCooking.prototype.onIngredientSelect = function() {
     this.createMeasurementSelectWindow();
-    this._measurementSelectWindow.setHandler("ok", () => {
-        this.addIngredientToCard();
-        this._ingredientSelectionWindow.activate();
-        this._ingredientSelectionWindow.redrawCurrentItem();
-        this.removeChild(this._measurementSelectWindow);
-        // Check if max ingredients reached
-        if($gameTemp._soupCooking.ingredients.length >= 3){
-            this._ingredientSelectionWindow.deactivate();
-            this.deactivateIngredientWindows();
-            this.createRecipeConfirmationWindow();
-        }
-    })
+    // Handle measurement selection
+    this._measurementSelectWindow.setHandler("ok", this.onMeasurementSelect.bind(this));
     this._measurementSelectWindow.setHandler("cancel", () => {
         this._ingredientSelectionWindow.activate();
         this.removeChild(this._measurementSelectWindow);
     })
 };
+
+Scene_SoupCooking.prototype.onMeasurementSelect = function(){
+    this.addIngredientToSoupCookingVar();
+    this._ingredientSelectionWindow.activate();
+    this._ingredientSelectionWindow.redrawCurrentItem();
+    this.removeChild(this._measurementSelectWindow);
+    // Check if max ingredients reached
+    if($gameTemp._soupCooking.ingredients.length >= 3){
+        this._ingredientSelectionWindow.deactivate();
+        this.deactivateIngredientWindows();
+        this.createRecipeConfirmationWindow();
+        // Handle recipe confirmation
+        this._recipeConfirmationWindow.setHandler("ok", this.onRecipeConfirmation.bind(this))
+        this._recipeConfirmationWindow.setHandler("cancel", () => {
+            this.removeChild(this._recipeConfirmationWindow);
+            this._ingredientSelectionWindow.activate();
+            this.activateIngredientWindows();
+        })
+    }
+}
+
+Scene_SoupCooking.prototype.onRecipeConfirmation = function(){
+    const ingredientsData = $gameTemp._soupCooking.ingredients;
+    $gameTemp._soupCooking.currentRecipe.price = this.calculateTotalIngredientPrice(ingredientsData);
+    $gameTemp._soupCooking.currentRecipe.stats = this.calculateStats(ingredientsData);
+    $gameTemp._soupCooking.currentRecipe.quality = this.calculateQuality(ingredientsData);
+    SceneManager.push(Scene_SoupRecipeCreated);
+}
+
+Scene_SoupCooking.prototype.calculateQuality = function(ingredients){
+    let finalQuality = 0;
+    const qualities = ingredients.map(ing => {
+        return parseInt(ing.quality);
+    })
+    console.log(qualities);
+    qualities.forEach(qual => {
+        finalQuality += qual;
+    })
+    finalQuality = Math.floor(finalQuality / qualities.length);
+    console.log(finalQuality);
+    return finalQuality;
+}
+
+Scene_SoupCooking.prototype.calculateStats = function(ingredients){
+    let finalStats = {
+        taste: 0,
+        heartiness: 0,
+        calories: 0
+    };
+    const tastes = ingredients.map(ing => {
+        return parseInt(ing.stats.taste);
+    })
+    const heartinesses = ingredients.map(ing => {
+        return parseInt(ing.stats.heartiness);
+    })
+    const calories = ingredients.map(ing => {
+        return parseInt(ing.stats.calories);
+    })
+    tastes.forEach((taste, index) => {
+        finalStats.taste += taste;
+        finalStats.heartiness += heartinesses[index];
+        finalStats.calories += calories[index];
+    })
+    return finalStats;
+}
+
+Scene_SoupCooking.prototype.calculateTotalIngredientPrice = function(ingredients){
+    let totalPrice = 0;
+    const prices = ingredients.map(ing => {
+        return ing.price;
+    })
+    const quantities = ingredients.map(ing => {
+        return parseInt(ing.quantity.split("g")[0]); // Remove "g" measurement and turn into a number
+    })
+    prices.forEach((price, index) => {
+        let priceQuantity = quantities[index] * 0.01;
+        let totalItemPrice = price * priceQuantity;
+        totalPrice += totalItemPrice;
+    })
+    return totalPrice;
+}
+
+Scene_SoupCooking.prototype.activateIngredientWindows = function(){
+    this._ingredientCardWMeasurementWindows.forEach(win => {
+        win.activate();
+    })
+}
 
 Scene_SoupCooking.prototype.deactivateIngredientWindows = function(){
     this._ingredientCardWMeasurementWindows.forEach(win => {
@@ -118,7 +203,7 @@ Scene_SoupCooking.prototype.createMeasurementSelectWindow = function(){
     this.addChild(this._measurementSelectWindow);
 }
 
-Scene_SoupCooking.prototype.addIngredientToCard = function(){
+Scene_SoupCooking.prototype.addIngredientToSoupCookingVar = function(){
     let ingredientData = this._ingredientCardWMeasurementWindows[0].getIngredientCardDataFromItem(this._ingredientSelectionWindow.item());
     let ingredientIndex = $gameTemp._soupCooking.ingredients.push(ingredientData) - 1;
     $gameTemp._soupCooking.ingredients[ingredientIndex].quantity = this._measurementSelectWindow.currentSymbol();
@@ -128,10 +213,6 @@ Scene_SoupCooking.prototype.createRecipeConfirmationWindow = function(){
     this._recipeConfirmationWindow = new Window_IngredientRecipeConfirm();
     this.addChild(this._recipeConfirmationWindow);
 }
-
-Scene_SoupCooking.prototype.onItemCancel = function() {
-    SceneManager.pop();
-};
 
 /* Window IngredientCard with measurements */
 function Window_IngredientCardWithMeasurements(){
@@ -144,6 +225,7 @@ Window_IngredientCardWithMeasurements.prototype.constructor = Window_IngredientC
 Window_IngredientCardWithMeasurements.prototype.initialize = function(x, y){
     Window_IngredientCard.prototype.initialize.call(this, x, y);
     this.createMeasurementWindow();
+    this._activated = true;
 }
 
 Window_IngredientCardWithMeasurements.prototype.createMeasurementWindow = function(){
@@ -206,8 +288,8 @@ Window_IngredientSelection.prototype = Object.create(Window_ItemList.prototype);
 Window_IngredientSelection.prototype.constructor = Window_IngredientSelection;
 
 Window_IngredientSelection.prototype.initialize = function(){
-    this._windowPos = { x: 210, y: 460 };
-    this._windowSize = { width: 580, height: 150 };
+    this._windowPos = { x: 150, y: 460 };
+    this._windowSize = { width: 700, height: 150 };
     Window_ItemList.prototype.initialize.call(this, this._windowPos.x, this._windowPos.y, this._windowSize.width, this._windowSize.height);
     this.setCategory("item");
     this.activate();
@@ -220,17 +302,20 @@ Window_IngredientSelection.prototype.drawItem = function(index) {
         var rect = this.itemRect(index);
         rect.width -= this.textPadding();
         let chosenItems = $gameTemp._soupCooking.ingredients.map(ing => { return ing.name });
-        console.log(chosenItems);
-        chosenItems.forEach(chosen => {
-            if(chosen){
-                if(chosen.includes(item.name)){
-                    console.log("yes");
-                    this.changePaintOpacity(false);
-                } else {
-                    this.changePaintOpacity(true);
+        // If ingredients list is not populated in any way, ensure all ingredients are enabled
+        if(chosenItems.length > 0){
+            chosenItems.forEach(chosen => {
+                if(chosen){
+                    if(chosen.includes(item.name)){
+                        this.changePaintOpacity(false);
+                    } else {
+                        this.changePaintOpacity(true);
+                    }
                 }
-            }
-        })
+            })
+        } else {
+            this.changePaintOpacity(true);
+        }
         this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
         // this.drawItemNumber(item, rect.x, rect.y, rect.width);
     }
@@ -246,6 +331,10 @@ Window_IngredientSelection.prototype.redrawAllItems = function(){
             this.redrawItem(i);
         }
     }
+}
+
+Window_IngredientSelection.prototype.maxCols = function(){
+    return 3;
 }
 
 /* Window IngredientMeasurementSelect */
@@ -339,4 +428,169 @@ Window_IngredientRecipeConfirm.prototype.itemRect = function(index) {
 
 Window_IngredientRecipeConfirm.prototype.drawConfirmationText = function(){
     this.drawTextEx("Confirm this recipe?", 45, -10);
+}
+
+/* Scene_SoupRecipeCreated */
+
+function Scene_SoupRecipeCreated(){
+    this.initialize.apply(this, arguments);
+}
+
+Scene_SoupRecipeCreated.prototype = Object.create(Scene_MenuBase.prototype);
+Scene_SoupRecipeCreated.prototype.constructor = Scene_SoupRecipeCreated;
+
+Scene_SoupRecipeCreated.prototype.create = function(){
+    Scene_MenuBase.prototype.create.call(this);
+    this._recipeCardWindow = new Window_IngredientCardRecipe(330, 130);
+    this.addChild(this._recipeCardWindow);
+}
+
+Scene_SoupRecipeCreated.prototype.update = function(){
+    Scene_MenuBase.prototype.update.call(this);
+    this._recipeCardWindow.refresh($gameTemp._soupCooking.currentRecipe);
+}
+
+/* Window IngredientCardRecipe */
+function Window_IngredientCardRecipe(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_IngredientCardRecipe.prototype = Object.create(Window_IngredientCard.prototype);
+Window_IngredientCardRecipe.prototype.constructor = Window_IngredientCardRecipe;
+
+Window_IngredientCardRecipe.prototype.initialize = function(x, y){
+    Window_IngredientCard.prototype.initialize.call(this, x, y)
+    this.createTabWindows();
+    this.createRecipeNameInputWindow();
+    this.createRecipeMessageWindow();
+    this.createRecipeConfirmationWindow();
+    this._recipeConfirmationWindow.setHandler('ok', this.onFullConfirmation.bind(this));
+}
+
+const recipe_windowingredientcardreciperefresh_override = Window_IngredientCardRecipe.prototype.refresh;
+Window_IngredientCardRecipe.prototype.refresh = function(currentRecipe){
+    recipe_windowingredientcardreciperefresh_override.call(this, currentRecipe);
+    this._recipeNameInputWindow.refresh();
+}
+
+Window_IngredientCardRecipe.prototype.onFullConfirmation = function(){
+    if(this._recipeNameInputWindow._textBuffer != 0){
+        // TODO: ADD RECIPE TO PLAYER RECIPES
+        $gameTemp._soupCooking.name = this._recipeNameInputWindow._textBuffer;
+        // Revert soup cooking object back to its original state
+        $gameTemp._soupCooking = {
+            ingredients: [],
+            currentRecipe: {
+                name: "Edit Name",
+                quality: 3,
+                price: 250,
+                type: "soup",
+                imgIndex: 0,
+                stats: {
+                    taste: 6,
+                    heartiness: 3,
+                    calories: 980
+                }
+            },
+        }
+        SceneManager.pop();
+    } else {
+        this._recipeConfirmationWindow.activate();
+    }
+}
+
+Window_IngredientCardRecipe.prototype.createRecipeMessageWindow = function(){
+    this._recipeMessageWindow = new Window_RecipeMessage(0, -70);
+    this.addChild(this._recipeMessageWindow);
+}
+
+Window_IngredientCardRecipe.prototype.createRecipeConfirmationWindow = function(){
+    this._recipeConfirmationWindow = new Window_RecipeConfirmation(0, 355);
+    this.addChild(this._recipeConfirmationWindow);
+}
+
+Window_IngredientCardRecipe.prototype.createRecipeNameInputWindow = function(){
+    this._recipeNameInputWindow = new Window_TextInput(this, 0, 150, 230, 80, $gameTemp._soupCooking.currentRecipe.name, 11);
+    this.addChild(this._recipeNameInputWindow);
+}
+
+Window_IngredientCardRecipe.prototype.createTabWindows = function(){
+    this._ingredients = $gameTemp._soupCooking.ingredients;
+    this._recipeTabWindows = [
+        new Window_RecipeIngredientTab(228, 86),
+        new Window_RecipeIngredientTab(228, 145),
+        new Window_RecipeIngredientTab(228, 204),
+    ]
+    this._recipeTabWindows.forEach((tab, index) => {
+        this.addChild(tab);
+        tab.drawIngredient(this._ingredients[index]);
+    })
+}
+
+Window_IngredientCardRecipe.prototype.drawPrice = function(price){
+    this.drawText(`${price}`, 140, -7, 50, "center");
+    this.drawIcon(382, 105, 0);
+}
+
+Window_IngredientCardRecipe.prototype.drawName = function(name){
+}
+
+/* Window RecipeIngredientTab */
+function Window_RecipeIngredientTab(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_RecipeIngredientTab.prototype = Object.create(Window_Base.prototype);
+Window_RecipeIngredientTab.prototype.constructor = Window_IngredientCardRecipe;
+
+Window_RecipeIngredientTab.prototype.initialize = function(x, y){
+    this._windowSize = { width: 140, height: 65 };
+    Window_Base.prototype.initialize.call(this, x, y, this._windowSize.width, this._windowSize.height);
+}
+
+Window_RecipeIngredientTab.prototype.drawIngredient = function(ingredientData){
+    this.drawIcon(ingredientData.iconIndex, 0, 0);
+    this.drawTextEx(ingredientData.quantity, 40, -3);
+}
+
+/* Window RecipeMessage */
+function Window_RecipeMessage(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_RecipeMessage.prototype = Object.create(Window_Base.prototype);
+Window_RecipeMessage.prototype.constructor = Window_IngredientCardRecipe;
+
+Window_RecipeMessage.prototype.initialize = function(x, y){
+    this._windowSize = { width: 370, height: 65 };
+    Window_Base.prototype.initialize.call(this, x, y, this._windowSize.width, this._windowSize.height);
+    this.drawMessage();
+}
+
+Window_RecipeMessage.prototype.drawMessage = function(){
+    this.drawTextEx("You created a recipe!", 30, -3);
+}
+
+/* Window RecipeMessage */
+function Window_RecipeConfirmation(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_RecipeConfirmation.prototype = Object.create(Window_Command.prototype);
+Window_RecipeConfirmation.prototype.constructor = Window_IngredientCardRecipe;
+
+Window_RecipeConfirmation.prototype.initialize = function(x, y){
+    Window_Command.prototype.initialize.call(this, x, y);
+}
+
+Window_RecipeConfirmation.prototype.windowWidth = function(){
+    return 370;
+}
+
+Window_RecipeConfirmation.prototype.makeCommandList = function(enabled){
+    this.addCommand("OK", "ok", true);
+}
+
+Window_RecipeConfirmation.prototype.itemTextAlign = function(){
+    return "center";
 }

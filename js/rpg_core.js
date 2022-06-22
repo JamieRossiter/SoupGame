@@ -3006,7 +3006,6 @@ Input.keyMapper = {
     17: 'control',  // control
     18: 'control',  // alt
     27: 'escape',   // escape
-    32: 'ok',       // space
     33: 'pageup',   // pageup
     34: 'pagedown', // pagedown
     37: 'left',     // left arrow

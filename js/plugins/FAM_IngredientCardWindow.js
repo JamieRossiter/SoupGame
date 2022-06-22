@@ -42,7 +42,8 @@ Window_IngredientCard.prototype.drawName = function(name){
 }
 
 Window_IngredientCard.prototype.drawPrice = function(price){
-    this.drawTextExAlign(`\\c[1]${price}\\c[0]`, 90, -7, 50, "right");
+    this.drawText(`${price}`, 140, -7, 50, "center");
+    this.drawText("/ 100g", 145, 20, 50, "right");
     this.drawIcon(382, 105, 0);
 }
 
@@ -53,6 +54,7 @@ Window_IngredientCard.prototype.getIngredientCardDataFromItem = function(item){
         // Get obvious data
         data["name"] = item.name;
         data["price"] = item.price;
+        data["iconIndex"] = item.iconIndex;
         if(item.note){
             // Get data from item note tag
             let split = item.note.split("\n");
